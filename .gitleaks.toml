@@ -1,0 +1,8 @@
+[extend]
+useDefault = true
+
+[[rules]]
+id = "devsecops-github-test"
+description = "Test GitHub secret for DevSecOps pipeline"
+regex = '''ghp_[A-Za-z0-9]{70,}'''
+keywords = ["ghp_"]
