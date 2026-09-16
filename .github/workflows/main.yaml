@@ -12,14 +12,16 @@ contents: read
 security-events: write
 
 jobs:
+
 gitleaks:
 name: Secret Scanning
 runs-on: ubuntu-latest
+
 steps:
-- name: Checkout source
-uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-with:
-fetch-depth: 0
+  - name: Checkout source
+    uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+    with:
+      fetch-depth: 0
 
   - name: Install Gitleaks
     run: |
@@ -45,11 +47,12 @@ fetch-depth: 0
 sonarqube:
 name: SonarCloud Code Analysis
 runs-on: ubuntu-latest
+
 steps:
-- name: Checkout source
-uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-with:
-fetch-depth: 0
+  - name: Checkout source
+    uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+    with:
+      fetch-depth: 0
 
   - name: SonarCloud Scan
     uses: SonarSource/sonarqube-scan-action@7006c4492b2e0ee0f816d36501671557c97f5995
@@ -64,12 +67,14 @@ fetch-depth: 0
 docker-build:
 name: Build Docker Image
 runs-on: ubuntu-latest
+
 needs:
-- gitleaks
-- sonarqube
+  - gitleaks
+  - sonarqube
+
 steps:
-- name: Checkout source
-uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+  - name: Checkout source
+    uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
   - name: Build Docker image
     run: |
@@ -80,13 +85,15 @@ uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 trivy:
 name: Trivy Container Scan
 runs-on: ubuntu-latest
+
 needs:
-- docker-build
+  - docker-build
+
 steps:
-- name: Checkout source
-uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-with:
-fetch-depth: 0
+  - name: Checkout source
+    uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+    with:
+      fetch-depth: 0
 
   - name: Build Docker image
     run: |
