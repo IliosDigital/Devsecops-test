@@ -4,7 +4,6 @@ on:
 push:
 branches:
 - main
-
 pull_request:
 types: [opened, synchronize, reopened]
 
@@ -13,20 +12,14 @@ contents: read
 security-events: write
 
 jobs:
-
---------------------------------
-1. GITLEAKS
---------------------------------
-
 gitleaks:
 name: Secret Scanning
 runs-on: ubuntu-latest
-
 steps:
-  - name: Checkout source
-    uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-    with:
-      fetch-depth: 0
+- name: Checkout source
+uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+with:
+fetch-depth: 0
 
   - name: Install Gitleaks
     run: |
@@ -48,22 +41,18 @@ steps:
       name: gitleaks-results
       path: gitleaks-results.sarif
 
---------------------------------
-2. SONARCLOUD
---------------------------------
 
 sonarqube:
 name: SonarCloud Code Analysis
 runs-on: ubuntu-latest
-
 steps:
-  - name: Checkout source
-    uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-    with:
-      fetch-depth: 0
+- name: Checkout source
+uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+with:
+fetch-depth: 0
 
   - name: SonarCloud Scan
-    uses: SonarSource/sonarqube-scan-action@7006c4492b2e0ee0f816d36501671557c97f5995 # v8.1.0
+    uses: SonarSource/sonarqube-scan-action@7006c4492b2e0ee0f816d36501671557c97f5995
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     with:
@@ -71,43 +60,33 @@ steps:
         -Dsonar.projectKey=IliosDigital_Devsecops-test
         -Dsonar.organization=iliosdigital
 
---------------------------------
-3. BUILD DOCKER IMAGE
---------------------------------
 
 docker-build:
 name: Build Docker Image
 runs-on: ubuntu-latest
-
 needs:
-  - gitleaks
-  - sonarqube
-
+- gitleaks
+- sonarqube
 steps:
-  - name: Checkout source
-    uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+- name: Checkout source
+uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
   - name: Build Docker image
     run: |
       docker build \
         -t devsecops-demo:${{ github.sha }} .
 
---------------------------------
-4. TRIVY
---------------------------------
 
 trivy:
 name: Trivy Container Scan
 runs-on: ubuntu-latest
-
 needs:
-  - docker-build
-
+- docker-build
 steps:
-  - name: Checkout source
-    uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-    with:
-      fetch-depth: 0
+- name: Checkout source
+uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+with:
+fetch-depth: 0
 
   - name: Build Docker image
     run: |
