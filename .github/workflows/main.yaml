@@ -12,6 +12,10 @@ permissions:
   security-events: write
 
 jobs:
+
+  # ============================================================
+  # 1. GITLEAKS - SECRET SCANNING
+  # ============================================================
   gitleaks:
     name: Secret Scanning
     runs-on: ubuntu-latest
@@ -25,11 +29,28 @@ jobs:
       - name: Install Gitleaks
         run: |
           VERSION="8.24.3"
-          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/gitleaks_${VERSION}_linux_x64.tar.gz" -o gitleaks.tar.gz
+
+          curl -sSfL \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/gitleaks_${VERSION}_linux_x64.tar.gz" \
+            -o gitleaks.tar.gz
+
           tar -xzf gitleaks.tar.gz
+
           sudo mv gitleaks /usr/local/bin/gitleaks
           sudo chmod +x /usr/local/bin/gitleaks
+
           gitleaks version
+
+      - name: Verify repository contents
+        run: |
+          echo "Repository:"
+          pwd
+
+          echo "Files:"
+          find . -type f \
+            -not -path './.git/*' \
+            -not -path './.github/*' \
+            | sort
 
       - name: Run Gitleaks
         run: |
@@ -55,6 +76,10 @@ jobs:
           name: gitleaks-results
           path: gitleaks-results.sarif
 
+
+  # ============================================================
+  # 2. SONARCLOUD - SOURCE CODE ANALYSIS
+  # ============================================================
   sonarqube:
     name: SonarCloud Code Analysis
     runs-on: ubuntu-latest
@@ -74,6 +99,11 @@ jobs:
             -Dsonar.projectKey=IliosDigital_Devsecops-test
             -Dsonar.organization=iliosdigital
 
+
+  # ============================================================
+  # 3. DOCKER BUILD
+  # Only runs when Gitleaks AND SonarCloud succeed
+  # ============================================================
   docker-build:
     name: Build Docker Image
     runs-on: ubuntu-latest
@@ -91,6 +121,10 @@ jobs:
           docker build \
             -t devsecops-demo:${{ github.sha }} .
 
+
+  # ============================================================
+  # 4. TRIVY - CONTAINER VULNERABILITY SCANNING
+  # ============================================================
   trivy:
     name: Trivy Container Scan
     runs-on: ubuntu-latest
@@ -124,3 +158,10 @@ jobs:
         with:
           sarif_file: trivy-results.sarif
           category: trivy-container
+
+      - name: Upload Trivy artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-results
+          path: trivy-results.sarif
