@@ -33,7 +33,8 @@ jobs:
 
       - name: Run Gitleaks
         run: |
-          gitleaks git . \
+          gitleaks detect \
+            --source . \
             --redact \
             --verbose \
             --exit-code 1 \
