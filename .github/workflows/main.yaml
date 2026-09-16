@@ -41,7 +41,14 @@ jobs:
             --report-format sarif \
             --report-path gitleaks-results.sarif
 
-      - name: Upload Gitleaks results
+      - name: Upload Gitleaks SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: gitleaks-results.sarif
+          category: gitleaks
+
+      - name: Upload Gitleaks artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
